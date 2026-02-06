@@ -1,0 +1,31 @@
+tensorflow[and-cuda]==2.17.0
+transformers==4.44.0
+datasets==3.0.0
+fastapi==0.112.0
+uvicorn[standard]==0.30.0
+pydantic==2.8.2
+python-multipart==0.0.9
+streamlit==1.38.0
+plotly==5.24.0
+mlflow==2.16.0
+pandas==2.2.2
+numpy<2.0.0
+requests==2.32.3
+python-dotenv==1.0.1
+protobuf==4.25.4
+# Optional: helps with legacy keras support in transformers if needed
+tf-keras==2.17.0
+
+# NVIDIA CUDA libraries for GPU support
+nvidia-cublas-cu12
+nvidia-cuda-cupti-cu12
+nvidia-cuda-nvcc-cu12
+nvidia-cuda-nvrtc-cu12
+nvidia-cuda-runtime-cu12
+nvidia-cudnn-cu12
+nvidia-cufft-cu12
+nvidia-curand-cu12
+nvidia-cusolver-cu12
+nvidia-cusparse-cu12
+nvidia-nccl-cu12
+nvidia-nvjitlink-cu12
