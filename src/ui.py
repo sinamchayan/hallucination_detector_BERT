@@ -327,7 +327,7 @@ def main():
         st.header("Analytics Dashboard")
         
         metrics = get_metrics()
-        if metrics and metrics['total_requests'] > 0:
+        if metrics and isinstance(metrics, dict) and metrics.get('total_requests', 0) > 0:
             # Summary metrics
             col1, col2, col3, col4 = st.columns(4)
             
