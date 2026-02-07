@@ -1,4 +1,3 @@
-"""Configuration for the hallucination detector"""
 import os
 from pathlib import Path
 
@@ -17,8 +16,8 @@ LOGS_DIR.mkdir(exist_ok=True)
 MODEL_CONFIG = {
     'base_model': 'bert-base-uncased',
     'model_save_path': MODEL_DIR / 'saved_model',
-    'num_labels': 3,
-    'max_length': 128,
+    'num_labels': 3,  # entailment, neutral, contradiction
+    'max_length': 256,
     'labels': {
         0: 'CORRECT ✅',
         1: 'UNCLEAR ⚠️',
@@ -28,8 +27,8 @@ MODEL_CONFIG = {
 
 # Training settings
 TRAINING_CONFIG = {
-    'num_samples': 50000,
-    'batch_size': 4,
+    'num_samples': 50000,  # Use 50k examples
+    'batch_size': 32,
     'epochs': 3,
     'learning_rate': 2e-5,
     'validation_split': 0.1,
@@ -46,7 +45,7 @@ API_CONFIG = {
 
 # UI settings
 UI_CONFIG = {
-    'title': 'Hallucination Detector(BERT)',
+    'title': '🔍 Hallucination Detector(BERT)',
     'page_icon': '🔍',
     'layout': 'wide',
     'api_url': os.getenv('API_URL', 'http://localhost:8000')
