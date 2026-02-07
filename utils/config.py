@@ -46,7 +46,7 @@ API_CONFIG = {
 
 # UI settings
 UI_CONFIG = {
-    'title': '🔍 AI Hallucination Detector',
+    'title': '🔍 Hallucination Detector (BERT)',
     'page_icon': '🔍',
     'layout': 'wide',
     'api_url': os.getenv('API_URL', 'http://localhost:8000')

@@ -51,6 +51,17 @@ class CheckResponse(BaseModel):
     processing_time_ms: float
     timestamp: str
 
+class BatchCheckRequest(BaseModel):
+    text_pairs: List[dict]
+
+# Metrics storage
+metrics = {
+    'total_requests': 0,
+    'total_hallucinations_detected': 0,
+    'average_confidence': 0.0,
+    'hallucination_rate': 0.0
+}
+
 # Endpoints
 @app.get("/")
 async def root():
@@ -70,6 +81,11 @@ async def health_check():
         "timestamp": datetime.now().isoformat()
     }
 
+@app.get("/metrics")
+async def get_metrics():
+    """Get global usage metrics"""
+    return metrics
+
 @app.post("/check", response_model=CheckResponse)
 async def check_hallucination(request: CheckRequest):
     """Check a single summary for hallucinations"""
@@ -77,8 +93,35 @@ async def check_hallucination(request: CheckRequest):
     
     try:
         logger.info("Received check request")
+        
+        # Make prediction
         result = detector.predict(request.original_text, request.summary_text)
+        
+        # Calculate processing time
         processing_time = (time.time() - start_time) * 1000
+        
+        # Update metrics
+        global metrics
+        metrics['total_requests'] += 1
+        
+        # Update running average confidence
+        # New Avg = ((Old Avg * (N-1)) + New Value) / N
+        if metrics['total_requests'] > 1:
+            prev_total = metrics['total_requests'] - 1
+            curr_conf = result['confidence']
+            metrics['average_confidence'] = (
+                (metrics['average_confidence'] * prev_total) + curr_conf
+            ) / metrics['total_requests']
+        else:
+            metrics['average_confidence'] = result['confidence']
+            
+        if "HALLUCINATION" in result['result']:
+            metrics['total_hallucinations_detected'] += 1
+            
+        if metrics['total_requests'] > 0:
+            metrics['hallucination_rate'] = (
+                metrics['total_hallucinations_detected'] / metrics['total_requests']
+            )
         
         response = CheckResponse(
             **result,
@@ -112,6 +155,56 @@ async def get_examples():
             }
         ]
     }
+
+@app.post("/batch")
+async def batch_check(request: BatchCheckRequest):
+    """Batch check multiple summaries"""
+    start_time = time.time()
+    
+    try:
+        logger.info(f"Received batch request with {len(request.text_pairs)} pairs")
+        
+        pairs = [(p['original_text'], p['summary_text']) for p in request.text_pairs]
+        results = detector.batch_predict(pairs)
+        
+        processing_time = (time.time() - start_time) * 1000
+        avg_time = processing_time / len(pairs) if pairs else 0
+        
+        # Update metrics for batch (simplified)
+        global metrics
+        metrics['total_requests'] += len(pairs)
+        
+        hallucination_count = sum(1 for r in results if "HALLUCINATION" in r['result'])
+        metrics['total_hallucinations_detected'] += hallucination_count
+        
+        # Approximate average confidence update (simplified)
+        if len(pairs) > 0:
+            batch_avg_conf = sum(r['confidence'] for r in results) / len(pairs)
+            
+            # Simple weighted average update
+            prev_total = metrics['total_requests'] - len(pairs)
+            if prev_total > 0:
+                metrics['average_confidence'] = (
+                    (metrics['average_confidence'] * prev_total) + (batch_avg_conf * len(pairs))
+                ) / metrics['total_requests']
+            else:
+                metrics['average_confidence'] = batch_avg_conf
+
+        if metrics['total_requests'] > 0:
+            metrics['hallucination_rate'] = (
+                metrics['total_hallucinations_detected'] / metrics['total_requests']
+            )
+            
+        return {
+            "results": results,
+            "total_pairs": len(pairs),
+            "processing_time_ms": processing_time,
+            "avg_processing_time_ms": avg_time,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error processing batch request: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == '__main__':
     import uvicorn
