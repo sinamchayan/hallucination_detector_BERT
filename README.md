@@ -1,4 +1,4 @@
-# 🔍 AI Hallucination Detector (TensorFlow)
+# Hallucination Detector (BERT - TensorFlow)
 
 Detect false information (hallucinations) in AI-generated summaries using Natural Language Inference with TensorFlow BERT.
 
