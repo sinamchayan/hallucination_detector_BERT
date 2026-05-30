@@ -13,7 +13,6 @@ numpy<2.0.0
 requests==2.32.3
 python-dotenv==1.0.1
 protobuf==4.25.4
-# Optional: helps with legacy keras support in transformers if needed
 tf-keras==2.17.0
 
 # NVIDIA CUDA libraries for GPU support
