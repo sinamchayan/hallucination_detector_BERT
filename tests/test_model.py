@@ -51,7 +51,6 @@ class TestHallucinationDetector(unittest.TestCase):
         inputs = self.detector.preprocess(premise, hypothesis)
         self.assertIn('input_ids', inputs)
         self.assertIn('attention_mask', inputs)
-        # TensorFlow tensors
         self.assertEqual(inputs['input_ids'].shape[0], 1)
 
 if __name__ == '__main__':
