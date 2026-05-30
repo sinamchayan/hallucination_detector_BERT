@@ -1,4 +1,3 @@
-"""Main entry point for the hallucination detector"""
 import argparse
 import subprocess
 import sys
